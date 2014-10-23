@@ -29,4 +29,5 @@ namespace ElkRiv.Web.PrivateLabel.Code.Helpers
         }
     }
 }
-Wheelsgg
+Wheels
+Car
