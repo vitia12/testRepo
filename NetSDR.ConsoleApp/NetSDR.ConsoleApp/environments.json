@@ -1,0 +1,13 @@
+﻿{
+  "Host": "127.0.0.1",
+  "TcpPort": 50000,
+  "UdpPort": 60000,
+  "StartStopReceiver": {
+    "IsComplex": true,
+    "CaptureMode": "0x80",
+    "FifoSamples": 0
+  },
+  "Frequency": {
+    "ChannelId": "0xFF"
+  }
+}
