@@ -15,9 +15,7 @@ public static class Program
         Console.WriteLine("\nWelcome to NetSdr Sample Tool!");
         Console.WriteLine("\nAvailable options: Please enter number");
 
-        var serviceProvider = new ServiceCollection()
-            .AddTransient<INetSdrClient, NetSdrClient>()
-            .BuildServiceProvider();
+        var serviceProvider = RegisterServices();
         var netSdrClient = serviceProvider.GetRequiredService<INetSdrClient>();
 
         var availableCommands = GetSdrCommands();
@@ -30,27 +28,27 @@ public static class Program
         while (true)
         {
             var inputValue = Console.ReadLine();
-            var command = GetCommandIdentifier(inputValue, availableCommands);
+            var command = GetParsedCommandId(inputValue, availableCommands);
             switch (command)
             {
                 case 1:
-                    netSdrClient.Connect(environmentSettings.Host, environmentSettings.TcpPort);
+                    netSdrClient.Connect(environmentSettings.Host, environmentSettings.TcpPort, environmentSettings.UdpPort);
                     break;
                 case 2:
                     netSdrClient.Disconnect();
                     break;
                 case 3:
                     Console.WriteLine("Starting I/Q transmitting...");
-                    netSdrClient.StartStopReceiver(true, environmentSettings.StartStopReceiver);
+                    netSdrClient.ToggleReceiverState(true, environmentSettings.Receiver);
                     break;
                 case 4:
                     Console.WriteLine("Stopping I/Q transmitting...");
-                    netSdrClient.StartStopReceiver(false, environmentSettings.StartStopReceiver);
+                    netSdrClient.ToggleReceiverState(false, environmentSettings.Receiver);
                     break;
                 case 5:
                     Console.WriteLine("Enter frequency value in Hz");
                     var frequencyInputValue = Console.ReadLine();
-                    var frequency = GetFrequency(frequencyInputValue);
+                    var frequency = GetParsedFrequency(frequencyInputValue);
                     if (frequency != ErrorCode)
                     {
                         Console.WriteLine("Changing frequency...");
@@ -62,9 +60,6 @@ public static class Program
                     }
 
                     break;
-                case 6:
-                    Console.WriteLine("Exiting application...");
-                    return;
                 default:
                     Console.WriteLine("Invalid command. Please try again.");
                     break;
@@ -74,37 +69,33 @@ public static class Program
         }
     }
 
-    private static IReadOnlyCollection<SdrCommand> GetSdrCommands()
+    private static ServiceProvider RegisterServices()
     {
-        return new List<SdrCommand>()
-        {
-            new(1, "Connect"),
-            new(2, "Disconnect"),
-            new(3, "Start I/Q transmitting"),
-            new(4, "Stop I/Q transmitting"),
-            new(5, "Change Frequency")
-        };
+        var serviceProvider = new ServiceCollection()
+            .AddTransient<INetSdrClient, NetSdrServer>()
+            .AddTransient<ITcpClientWrapper, TcpClientWrapper>()
+            .AddTransient<IUdpClientWrapper, UdpClientWrapper>()
+            .BuildServiceProvider();
+        return serviceProvider;
     }
 
-    private static int GetCommandIdentifier(string? inputValue, IReadOnlyCollection<SdrCommand> availableCommands)
-    {
-        if (!string.IsNullOrEmpty(inputValue) && int.TryParse(inputValue, out var input) && availableCommands.Any(c => c.Identifier == input))
-        {
-            return input;
-        }
+    private static IReadOnlyCollection<SdrCommand> GetSdrCommands() =>
+    [
+        new(1, "Connect"),
+        new(2, "Disconnect"),
+        new(3, "Start I/Q transmitting"),
+        new(4, "Stop I/Q transmitting"),
+        new(5, "Change Frequency")
+    ];
 
-        return ErrorCode;
+    private static int GetParsedCommandId(string? inputValue, IReadOnlyCollection<SdrCommand> availableCommands)
+    {
+        return !string.IsNullOrEmpty(inputValue) && int.TryParse(inputValue, out var input) && availableCommands.Any(c => c.Identifier == input)
+            ? input
+            : ErrorCode;
     }
 
-    private static int GetFrequency(string? inputValue)
-    {
-        if (!string.IsNullOrEmpty(inputValue) && int.TryParse(inputValue, out var input))
-        {
-            return input;
-        }
-
-        return ErrorCode;
-    }
+    private static int GetParsedFrequency(string? inputValue) => !string.IsNullOrEmpty(inputValue) && int.TryParse(inputValue, out var input) ? input : ErrorCode;
 
     private static EnvironmentSettings ReadEnvironmentSettings()
     {

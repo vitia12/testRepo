@@ -4,8 +4,8 @@ namespace NetSDR.Library.Services;
 
 public interface INetSdrClient
 {
-    void Connect(string host = "127.0.0.1", int tcpPort = 50000, int udpPort = 60000);
+    void Connect(string host, int tcpPort, int udpPort);
     void Disconnect();
-    void StartStopReceiver(bool start, StartStopReceiverConfig startStopReceiverConfig);
+    void ToggleReceiverState(bool start, ReceiverConfig receiverConfig);
     void SetFrequency(long frequencyHz, FrequencyConfig frequencyConfig);
 }

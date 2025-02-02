@@ -34,9 +34,9 @@ public static class Program
                     while (true)
                     {
 
-                        await Task.Delay(3000);
-                        //await stream.WriteAsync(data, 0, data.Length);
-                        //Console.WriteLine("TCP Message Sent");
+                        await Task.Delay(300);
+                        await stream.WriteAsync(data, 0, data.Length);
+                        Console.WriteLine("TCP Message Sent");
                     }
                 }
                 catch (Exception ex)
@@ -74,8 +74,8 @@ public static class Program
             while (true)
             {
 
-                await Task.Delay(3000);
-                await udpClient.SendAsync(data, data.Length); // Using Send after Connect
+                await Task.Delay(20000);
+                await udpClient.SendAsync(data, data.Length);
                 Console.WriteLine("UDP Message Sent");
             }
         }

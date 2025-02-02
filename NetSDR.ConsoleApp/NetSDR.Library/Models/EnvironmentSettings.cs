@@ -15,13 +15,13 @@ namespace NetSDR.Library.Models
         public int UdpPort { get; set; } = 60000;
 
         [JsonPropertyName("StartStopReceiver")]
-        public required StartStopReceiverConfig StartStopReceiver { get; set; }
+        public required ReceiverConfig Receiver { get; set; }
 
         [JsonPropertyName("Frequency")]
         public required FrequencyConfig FrequencyConfig { get; set; }
     }
 
-    public class StartStopReceiverConfig
+    public class ReceiverConfig
     {
         [JsonPropertyName("IsComplex")]
         public bool IsComplex { get; set; } = true;
